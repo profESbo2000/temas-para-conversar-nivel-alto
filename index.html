@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espacio de Debate C1 - Expresión Oral Avanzada</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        amberCustom: '#f59e0b',
+                        emeraldCustom: '#10b981',
+                        roseCustom: '#f43f5e'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #070a12 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .preserve-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        .card-pattern {
+            background-color: #1e1b4b;
+            background-image: radial-gradient(#6366f1 1.5px, transparent 1.5px), radial-gradient(#6366f1 1.5px, #1e1b4b 1.5px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .wheel-container {
+            transition: transform 4.5s cubic-bezier(0.15, 0.99, 0.24, 1);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- TOP NAVIGATION & HEADER -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-white/10 px-4 py-3 sm:px-8">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-gradient-to-tr from-brand-600 via-indigo-500 to-rose-500 rounded-2xl shadow-lg shadow-brand-500/30 text-white">
+                    <i class="fa-solid fa-comments text-xl sm:text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-rose-300">
+                        ArgumentaC1 <span class="text-xs px-2.5 py-0.5 rounded-full bg-brand-500/20 border border-brand-400/30 text-brand-300 font-bold uppercase tracking-wider">Avanzado</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Laboratorio de Fluidez y Estructuras Complejas</p>
+                </div>
+            </div>
+
+            <!-- Gamification Counter & Sound Toggle -->
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2 bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-full text-sm font-semibold">
+                    <i class="fa-solid fa-fire text-amber-500 animate-pulse"></i>
+                    <span class="text-slate-300 text-xs sm:text-sm">Intervenciones C1:</span>
+                    <span id="spoken-count" class="text-amber-400 font-bold text-base">0</span>
+                </div>
+
+                <button id="sound-toggle" onclick="toggleSound()" class="p-2 rounded-full bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition" title="Activar/Desactivar Sonido">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 sm:px-8 flex flex-col gap-6">
+
+        <!-- NAVIGATION TABS -->
+        <nav class="flex justify-center">
+            <div class="flex p-1.5 space-x-2 bg-slate-900/90 border border-slate-800 rounded-2xl max-w-2xl w-full text-sm font-medium shadow-inner">
+                <button onclick="switchSection('deck')" id="tab-deck" class="tab-btn flex-1 py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 bg-brand-600 text-white shadow-md">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span class="hidden sm:inline">Mazo 3D Gramatical</span>
+                </button>
+                <button onclick="switchSection('dilemmas')" id="tab-dilemmas" class="tab-btn flex-1 py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <span class="hidden sm:inline">Debates y Dilemas</span>
+                </button>
+                <button onclick="switchSection('roulette')" id="tab-roulette" class="tab-btn flex-1 py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                    <i class="fa-solid fa-dharmachakra"></i>
+                    <span class="hidden sm:inline">Ruleta Argumentativa</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- SECTION 1: 3D CARDS DECK -->
+        <section id="section-deck" class="flex flex-col gap-6">
+            <div class="flex flex-wrap justify-between items-center gap-4 bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-sparkles text-amber-400"></i> Tarjetas de Discurso y Modo Gramatical
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400">Haz clic en una carta para voltearla. Debes responder sosteniendo el argumento durante al menos 45-60 segundos.</p>
+                </div>
+
+                <button onclick="reshuffleDeck()" class="px-4 py-2 bg-brand-700 hover:bg-brand-600 text-slate-100 rounded-xl font-semibold text-sm transition flex items-center gap-2 shadow-sm border border-brand-500/40">
+                    <i class="fa-solid fa-shuffle"></i> Barajar Mazo
+                </button>
+            </div>
+
+            <!-- CARDS GRID -->
+            <div id="cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 my-2">
+                <!-- Dynamic Cards Inserted via JS -->
+            </div>
+        </section>
+
+        <!-- SECTION 2: DILEMMAS & READINGS -->
+        <section id="section-dilemmas" class="hidden flex-col gap-6">
+            <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-newspaper text-indigo-400"></i> Microdebates Socio-Culturales
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-400">Analiza el contexto y construye una postura matizada combinando conectores concesivos e hipótesis.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dilemmas-container">
+                <!-- Dilema cards inserted via JS -->
+            </div>
+        </section>
+
+        <!-- SECTION 3: EXPRESSION ROULETTE -->
+        <section id="section-roulette" class="hidden flex-col items-center justify-center gap-8 py-4">
+            <div class="text-center max-w-lg">
+                <h2 class="text-2xl font-extrabold text-white mb-2">Reto de Improvisación Avanzada ⚡</h2>
+                <p class="text-slate-400 text-sm">Gira la ruleta para obtener tu operador argumentativo obligatorio y sostén tu postura durante el tiempo seleccionado.</p>
+            </div>
+
+            <div class="relative flex flex-col items-center justify-center">
+                <!-- Pointer -->
+                <div class="absolute -top-6 z-20 text-rose-500 text-3xl filter drop-shadow-lg">
+                    <i class="fa-solid fa-location-arrow fa-rotate-180"></i>
+                </div>
+
+                <!-- Wheel Frame -->
+                <div class="w-72 h-72 sm:w-80 sm:h-80 rounded-full border-4 border-slate-700 p-2 bg-slate-950 shadow-2xl relative overflow-hidden flex items-center justify-center">
+                    <div id="roulette-wheel" class="wheel-container w-full h-full rounded-full border-2 border-slate-700 relative flex items-center justify-center bg-gradient-to-tr from-indigo-950 via-slate-900 to-rose-950">
+                        <div id="wheel-center-text" class="text-center p-4 z-10 font-bold text-slate-200">
+                            ¡Presiona Girar!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spin Button -->
+                <button onclick="spinRoulette()" id="spin-btn" class="mt-8 px-8 py-3.5 bg-gradient-to-r from-rose-500 via-brand-600 to-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-500/20 hover:scale-105 active:scale-95 transition-all text-base flex items-center gap-2">
+                    <i class="fa-solid fa-play"></i> ¡GIRAR RULETA!
+                </button>
+            </div>
+
+            <!-- Result Modal Box -->
+            <div id="roulette-result" class="hidden max-w-2xl w-full glass-panel border border-brand-500/30 rounded-2xl p-6 text-center animate-fade-in shadow-2xl">
+                <span class="text-xs uppercase font-bold tracking-wider text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">Operador Obligatorio C1</span>
+                
+                <div id="result-connector" class="text-2xl sm:text-3xl font-extrabold text-amber-300 my-3">
+                    "A no ser que + Subjuntivo..."
+                </div>
+
+                <div class="my-4 p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-left">
+                    <span class="text-xs text-slate-400 block mb-1 font-mono">TEMA DE DEBATE:</span>
+                    <p id="result-question" class="text-base sm:text-lg font-semibold text-slate-200">
+                        "¿Hasta qué punto la cultura de la hiperproductividad está dañando la salud mental de la sociedad actual?"
+                    </p>
+                </div>
+
+                <!-- Timer Component C1 -->
+                <div class="flex flex-col items-center gap-3 mt-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800">
+                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                        <span>Selecciona tiempo de habla:</span>
+                        <div class="flex gap-1">
+                            <button onclick="setTimerDuration(45)" class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs">45s</button>
+                            <button onclick="setTimerDuration(60)" class="px-2.5 py-0.5 rounded bg-brand-600 border border-brand-500 text-white text-xs">60s</button>
+                            <button onclick="setTimerDuration(90)" class="px-2.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs">90s</button>
+                        </div>
+                    </div>
+
+                    <div id="timer-display" class="text-4xl font-mono font-extrabold text-brand-400 tracking-wider">
+                        01:00
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="timer-bar" class="bg-brand-500 h-full w-full transition-all duration-1000"></div>
+                    </div>
+
+                    <div class="flex gap-3 mt-1">
+                        <button id="timer-start-btn" onclick="toggleTimer()" class="px-5 py-2 bg-emeraldCustom hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-play"></i> Iniciar
+                        </button>
+                        <button onclick="resetTimer()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs rounded-xl border border-slate-700 text-slate-300 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-right"></i> Reiniciar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CARD EXPAND MODAL -->
+    <div id="card-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="max-w-xl w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative flex flex-col gap-5">
+            <button onclick="closeModal()" class="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="flex items-center gap-2 text-xs font-bold text-brand-400 uppercase tracking-widest">
+                <i class="fa-solid fa-comments"></i> Tarjeta de Argumentación C1
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-950/70 border border-amber-500/30">
+                <span class="text-xs text-slate-400 font-medium block mb-1">Estructura u Operador Requerido:</span>
+                <div id="modal-connector" class="text-xl sm:text-2xl font-extrabold text-amber-300">
+                    "A no ser que + Subjuntivo..."
+                </div>
+                <span id="modal-grammar-tip" class="text-[11px] text-amber-400/80 font-mono mt-1 block">
+                    Exige Subjuntivo por indicar condición exclusiva.
+                </span>
+            </div>
+
+            <div>
+                <span class="text-xs text-slate-400 font-medium block mb-1">Premisa / Pregunta de Debate:</span>
+                <p id="modal-question" class="text-lg sm:text-xl font-bold text-white leading-relaxed">
+                    ¿Es la multitarea un indicador de eficiencia o un hábito perjudicial para el cerebro?
+                </p>
+            </div>
+
+            <!-- C1 Helper structure -->
+            <div class="bg-indigo-950/40 border border-indigo-900/50 rounded-xl p-3.5 text-xs text-indigo-200 flex flex-col gap-2">
+                <span class="font-bold flex items-center gap-1.5 text-indigo-300">
+                    <i class="fa-solid fa-compass"></i> Estructura tu respuesta (Mínimo 45 segundos):
+                </span>
+                <ul class="list-disc list-inside space-y-1 text-slate-300">
+                    <li><strong>Premisa:</strong> Inicia utilizando directamente el operador asignado.</li>
+                    <li><strong>Matiz / Concesión:</strong> Agrega un contraargumento (ej. *Si bien es cierto que...*).</li>
+                    <li><strong>Conclusión:</strong> Remata con tu postura personal fundamentada.</li>
+                </ul>
+            </div>
+
+            <!-- Modal Actions -->
+            <div class="flex gap-3 mt-2">
+                <button onclick="markCardSpoken()" class="flex-1 py-3 bg-gradient-to-r from-emeraldCustom to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-check text-base"></i> Registrar Intervención Lograda
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- C1 DATA STRUCTURES (CONNECTORS + GRAMMAR RULES) ---
+        const CONECTORES_C1 = [
+            { text: "Por más que + Subjuntivo...", tip: "Indica concesión extrema o dificultad insuperable." },
+            { text: "A no ser que + Subjuntivo...", tip: "Condición exclusiva. Equivale a 'a menos que'." },
+            { text: "A esto se suma que + Indicativo...", tip: "Operador de adición con peso probatorio." },
+            { text: "No es que + Subjuntivo, sino que...", tip: "Sirve para rectificar una falsa suposición." },
+            { text: "Con tal de que + Subjuntivo...", tip: "Condición mínima suficiente para que algo ocurra." },
+            { text: "Si bien es cierto que..., también...", tip: "Estructura concesiva para matizar en debates." },
+            { text: "Dado que + Indicativo...", tip: "Causa objetiva o premisa explicativa." },
+            { text: "En la medida en que + Subj./Ind....", tip: "Proporción o condición según el grado de certeza." },
+            { text: "Aun cuando + Subjuntivo...", tip: "Concesiva de alta incertidumbre o hipótesis futura." },
+            { text: "Salvo que + Subjuntivo...", tip: "Excepción condicional estricta." }
+        ];
+
+        const TOPICS_C1 = [
+            "¿Hasta qué punto la cultura de la hiperproductividad perjudica la calidad del descanso y la salud?",
+            "¿Es ético que las empresas monitoreen la actividad en pantalla de los empleados en teletrabajo?",
+            "¿Consideras que el prestigio social actual depende más del éxito laboral o del bienestar personal?",
+            "¿Crees que las herramientas de IA generativa democratizan la educación o acaban con el pensamiento crítico?",
+            "¿Deberían los gobiernos regular los algoritmos de redes sociales para proteger el sueño de los adolescentes?",
+            "¿Hasta qué punto es justificable priorizar la economía sobre la sostenibilidad ambiental?",
+            "¿Consideras que la educación universitaria tradicional está perdiendo relevancia frente a las certificaciones cortas?",
+            "¿Crees que el auge del nomadismo digital genera gentrificación negativa en las ciudades de acogida?",
+            "¿Es posible desconectar realmente del trabajo en una sociedad hiperconectada por mensajería?",
+            "¿Crees que la toma de decisiones basada exclusivamente en datos elimina la empatía humana?"
+        ];
+
+        const DILEMAS_C1 = [
+            {
+                title: "💤 La 'Medalla' del Cansancio y el Éxito",
+                tag: "Estilo de Vida & Salud",
+                text: "En muchos entornos profesionales avanzados se presume de dormir pocas horas y trabajar en multitarea como si fuera una medalla al mérito. Sin embargo, los neurocientíficos advierten que esto reduce drásticamente el rendimiento cognitivo y acelera el envejecimiento cerebral.",
+                question: "¿Por qué la sociedad hiperiluminada e hiperproductiva castiga el descanso reparador?",
+                tip: "Usa: 'A pesar de que', 'No es que... sino que', 'Por más que'."
+            },
+            {
+                title: "📱 Cabinas de Siesta en Empresas Tecnológicas",
+                tag: "Mundo Laboral",
+                text: "Grandes corporaciones han instalado cabinas de descanso para que sus empleados duerman siestas de 30 minutos, argumentando que promueve la creatividad. No obstante, algunos críticos afirman que es una estrategia para extender la jornada laboral de forma encubierta.",
+                question: "¿Se trata de un beneficio genuino o de un mecanismo de explotación sutil?",
+                tip: "Usa: 'Con tal de que', 'Si bien es cierto que', 'Salvo que'."
+            },
+            {
+                title: "🎓 Títulos Universitarios vs. Habilidades Prácticas",
+                tag: "Educación Avanzada",
+                text: "Cada vez más empresas de tecnología eliminan el requisito de título universitario para puestos directivos, priorizando proyectos reales. Por otro lado, instituciones académicas defienden que la universidad enseña el rigor conceptual que ningún curso rápido otorga.",
+                question: "¿Está en crisis el modelo universitario tradicional?",
+                tip: "Usa: 'A esto se suma que', 'Dado que', 'En la medida en que'."
+            },
+            {
+                title: "🤖 Automatización y Creatividad Humana",
+                tag: "Tecnología & Ética",
+                text: "Sistemas de Inteligencia Artificial redactan ensayos académicos, componen música y analizan código en segundos. Mientras algunos celebran la liberación de tareas rutinarias, otros temen la atrofia del pensamiento analítico original.",
+                question: "¿Qué habilidades serán verdaderamente insustituibles en la próxima década?",
+                tip: "Usa: 'Aun cuando', 'A no ser que', 'Encuentro que'."
+            }
+        ];
+
+        // --- GLOBAL STATE ---
+        let spokenCount = 0;
+        let soundEnabled = true;
+        let timerInterval = null;
+        let timerSeconds = 60;
+        let defaultTimerDuration = 60;
+        let isTimerRunning = false;
+        let audioCtx = null;
+
+        // --- AUDIO SYNTHESIZER ---
+        function playTone(freq, type = 'sine', duration = 0.15) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio non-permitted");
+            }
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 'sine', 0.1);
+            setTimeout(() => playTone(659.25, 'sine', 0.1), 90);
+            setTimeout(() => playTone(783.99, 'sine', 0.18), 180);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            icon.className = soundEnabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
+            if (soundEnabled) playTone(500, 'sine', 0.1);
+        }
+
+        // --- NAVIGATION ---
+        function switchSection(sectionId) {
+            document.getElementById('section-deck').classList.add('hidden');
+            document.getElementById('section-dilemmas').classList.add('hidden');
+            document.getElementById('section-roulette').classList.add('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex-1 py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50";
+            });
+
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+            document.getElementById(`section-${sectionId}`).classList.add('flex');
+
+            const activeTab = document.getElementById(`tab-${sectionId}`);
+            activeTab.className = "tab-btn flex-1 py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all duration-300 bg-brand-600 text-white shadow-md";
+
+            playTone(320, 'sine', 0.08);
+        }
+
+        // --- 3D CARD DECK LOGIC ---
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function createCardElement(index) {
+            const topic = getRandomItem(TOPICS_C1);
+            const connectorObj = getRandomItem(CONECTORES_C1);
+
+            const cardWrapper = document.createElement('div');
+            cardWrapper.className = "perspective-1000 w-full h-80 cursor-pointer group";
+            
+            // Set element attribute for flip interaction
+            cardWrapper.onclick = function(e) {
+                // Ignore click if fired from inner expand button
+                if (e.target.closest('.expand-btn')) return;
+                flipCard(this, connectorObj, topic);
+            };
+
+            cardWrapper.innerHTML = `
+                <div class="preserve-3d w-full h-full relative rounded-2xl shadow-xl">
+                    <!-- CARD BACK -->
+                    <div class="backface-hidden absolute inset-0 w-full h-full rounded-2xl card-pattern border border-brand-500/30 p-6 flex flex-col items-center justify-between shadow-2xl group-hover:border-rose-500/50 transition-colors">
+                        <div class="w-full flex justify-between items-center text-brand-300/60 text-xs font-mono">
+                            <span>TARJETA C1 #${index + 1}</span>
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+
+                        <div class="flex flex-col items-center gap-3 my-auto text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-900/80 border border-brand-400/30 flex items-center justify-center text-rose-400 text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <span class="text-xs font-extrabold text-slate-200 tracking-wider uppercase">Toca para Voltear</span>
+                        </div>
+
+                        <div class="text-[11px] text-brand-300/50 text-center font-medium">
+                            Estructura & Expresión Oral
+                        </div>
+                    </div>
+
+                    <!-- CARD FRONT -->
+                    <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 border-2 border-brand-500/50 p-5 flex flex-col justify-between shadow-2xl overflow-hidden">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-brand-500/20 text-brand-300 border border-brand-400/30">
+                                Operador C1
+                            </span>
+                            <button onclick="openModal('${connectorObj.text.replace(/'/g, "\\'")}', '${connectorObj.tip.replace(/'/g, "\\'")}', '${topic.replace(/'/g, "\\'")}')" class="expand-btn p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Ampliar">
+                                <i class="fa-solid fa-expand"></i>
+                            </button>
+                        </div>
+
+                        <div class="p-3 my-1 rounded-xl bg-slate-950/80 border border-amber-500/30 text-amber-300 font-extrabold text-base text-center shadow-inner">
+                            "${connectorObj.text}"
+                        </div>
+
+                        <p class="text-xs sm:text-sm font-semibold text-slate-100 text-center leading-relaxed my-auto">
+                            ${topic}
+                        </p>
+
+                        <div class="pt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
+                            <span class="text-slate-400">Toca para enfocar</span>
+                            <span class="text-emeraldCustom font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-microphone"></i> Habla 60s
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return cardWrapper;
+        }
+
+        function flipCard(element, connectorObj, topic) {
+            const inner = element.querySelector('.preserve-3d');
+            const isFlipped = inner.classList.contains('rotate-y-180');
+
+            if (!isFlipped) {
+                inner.classList.add('rotate-y-180');
+                playTone(420, 'triangle', 0.12);
+            } else {
+                openModal(connectorObj.text, connectorObj.tip, topic);
+            }
+        }
+
+        // FIXED BARUJAR MAZO FUNCTION
+        function reshuffleDeck() {
+            const grid = document.getElementById('cards-grid');
+            grid.innerHTML = '';
+            playTone(380, 'sine', 0.1);
+
+            for (let i = 0; i < 6; i++) {
+                grid.appendChild(createCardElement(i));
+            }
+        }
+
+        // --- DILEMMAS RENDER ---
+        function renderDilemmas() {
+            const container = document.getElementById('dilemmas-container');
+            container.innerHTML = '';
+
+            DILEMAS_C1.forEach((item, idx) => {
+                const connectorObj = getRandomItem(CONECTORES_C1);
+                const card = document.createElement('div');
+                card.className = "glass-panel rounded-2xl p-6 border border-slate-800 flex flex-col justify-between gap-4 hover:border-slate-700 transition shadow-xl";
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-md border border-rose-500/20">
+                                ${item.tag}
+                            </span>
+                            <span class="text-xs text-slate-400 font-mono">Dilema #${idx + 1}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">${item.title}</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 mb-4">
+                            ${item.text}
+                        </p>
+                        <div class="font-semibold text-sm text-brand-300 mb-2">
+                            <i class="fa-solid fa-circle-question text-amber-400 mr-1"></i> ${item.question}
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800/80 flex flex-col gap-2">
+                        <span class="text-xs text-slate-400">Sugerencia de estructura:</span>
+                        <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-xs sm:text-sm text-center">
+                            "${connectorObj.text}"
+                        </div>
+                        <button onclick="openModal('${connectorObj.text}', '${connectorObj.tip}', '${item.question}')" class="mt-2 w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-comments"></i> Debatir este dilema
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- ROULETTE LOGIC ---
+        function spinRoulette() {
+            const wheel = document.getElementById('roulette-wheel');
+            const btn = document.getElementById('spin-btn');
+            const resultBox = document.getElementById('roulette-result');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            resultBox.classList.add('hidden');
+
+            const randomRotation = 1800 + Math.floor(Math.random() * 360);
+            wheel.style.transform = `rotate(${randomRotation}deg)`;
+
+            let ticks = 0;
+            const tickInterval = setInterval(() => {
+                playTone(320 + (ticks % 4) * 40, 'sine', 0.05);
+                ticks++;
+                if (ticks > 22) clearInterval(tickInterval);
+            }, 130);
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+
+                const chosenConnector = getRandomItem(CONECTORES_C1);
+                const chosenQuestion = getRandomItem(TOPICS_C1);
+
+                document.getElementById('result-connector').innerText = `"${chosenConnector.text}"`;
+                document.getElementById('result-question').innerText = `"${chosenQuestion}"`;
+
+                resultBox.classList.remove('hidden');
+                playSuccessSound();
+                resetTimer();
+
+                confetti({
+                    particleCount: 45,
+                    spread: 60,
+                    origin: { y: 0.8 }
+                });
+
+            }, 4500);
+        }
+
+        // --- TIMER FUNCTIONALITY (FIXED & EXTENDED) ---
+        function setTimerDuration(seconds) {
+            defaultTimerDuration = seconds;
+            resetTimer();
+        }
+
+        function toggleTimer() {
+            if (isTimerRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (isTimerRunning) return;
+            isTimerRunning = true;
+
+            const startBtn = document.getElementById('timer-start-btn');
+            startBtn.innerHTML = `<i class="fa-solid fa-pause"></i> Pausar`;
+            startBtn.className = "px-5 py-2 bg-amberCustom hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5";
+
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    playTone(700, 'square', 0.35);
+                    
+                    startBtn.innerHTML = `<i class="fa-solid fa-play"></i> Iniciar`;
+                    startBtn.className = "px-5 py-2 bg-emeraldCustom hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5";
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            const startBtn = document.getElementById('timer-start-btn');
+            startBtn.innerHTML = `<i class="fa-solid fa-play"></i> Reanudar`;
+            startBtn.className = "px-5 py-2 bg-emeraldCustom hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5";
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerSeconds = defaultTimerDuration;
+            updateTimerDisplay();
+
+            const startBtn = document.getElementById('timer-start-btn');
+            startBtn.innerHTML = `<i class="fa-solid fa-play"></i> Iniciar`;
+            startBtn.className = "px-5 py-2 bg-emeraldCustom hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5";
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            document.getElementById('timer-display').innerText =
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+            const percent = (timerSeconds / defaultTimerDuration) * 100;
+            document.getElementById('timer-bar').style.width = `${percent}%`;
+        }
+
+        // --- MODAL & COUNTER ---
+        function openModal(connector, tip, question) {
+            document.getElementById('modal-connector').innerText = `"${connector}"`;
+            document.getElementById('modal-grammar-tip').innerText = tip || "Aplica la concordancia de modo correspondiente.";
+            document.getElementById('modal-question').innerText = question;
+
+            const modal = document.getElementById('card-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            playTone(450, 'sine', 0.1);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('card-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function markCardSpoken() {
+            spokenCount++;
+            document.getElementById('spoken-count').innerText = spokenCount;
+
+            closeModal();
+            playSuccessSound();
+
+            confetti({
+                particleCount: 50,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        // INIT
+        window.onload = function() {
+            reshuffleDeck();
+            renderDilemmas();
+            resetTimer();
+        };
+    </script>
+</body>
+</html>
